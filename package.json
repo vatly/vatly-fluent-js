@@ -1,0 +1,38 @@
+{
+  "name": "@getvatly/fluent",
+  "version": "0.1.0-alpha.1",
+  "description": "Framework-agnostic fluent billing on top of @getvatly/sdk",
+  "license": "MIT",
+  "type": "module",
+  "repository": "github:sandervanhooft/vatly-fluent-js",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+      "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
+    }
+  },
+  "files": ["dist", "README.md", "PORTING.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": { "node": ">=20" },
+  "packageManager": "pnpm@9.15.0",
+  "publishConfig": { "access": "public", "tag": "alpha" },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --platform neutral --target es2022",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "biome check src",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "prepack": "pnpm build"
+  },
+  "peerDependencies": { "@getvatly/sdk": ">=0.3.0-alpha.1 <0.4.0" },
+  "devDependencies": {
+    "@getvatly/sdk": "file:vendor/getvatly-sdk-0.3.0-alpha.1.tgz",
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "tsup": "^8.3.0",
+    "vitest": "^2.1.0"
+  }
+}
