@@ -121,9 +121,20 @@ const subscription = {
 
 describe("fluent public contract", () => {
   it("builds reusable subscription checkouts without accumulating products", async () => {
-    const h = harness([{ body: { id: "a" } }, { body: { id: "b" } }]);
+    const first = {
+      id: "a",
+      links: {
+        checkoutUrl: { href: "https://checkout.example.com/a" },
+        self: { href: "https://api.example.com/checkouts/a" },
+      },
+    };
+    const second = {
+      id: "b",
+      links: { checkoutUrl: { href: "https://checkout.example.com/b" } },
+    };
+    const h = harness([{ body: first }, { body: second }]);
     const builder = h.vatly
-      .subscriptionBuilder({ vatlyId: "customer_1" })
+      .subscribe({ vatlyId: "customer_1" })
       .toPlan("plan_1")
       .withQuantity(3)
       .withLocale("de_AT")
@@ -131,8 +142,12 @@ describe("fluent public contract", () => {
       .withMetadata({ host: "host_1" })
       .withBillingAddress({ country: "NL" })
       .inTestmode();
-    await builder.create();
-    await builder.create();
+    const checkoutA = await builder.create();
+    const checkoutB = await builder.create();
+    expect(checkoutA.getUrl()).toBe("https://checkout.example.com/a");
+    expect(checkoutB.getUrl()).toBe("https://checkout.example.com/b");
+    expect(checkoutA).toMatchObject(first);
+    expect(checkoutB).toMatchObject(second);
     expect(h.requests.map((r) => r.body.products)).toEqual([
       [{ id: "plan_1", quantity: 3, trialDays: 2 }],
       [{ id: "plan_1", quantity: 3, trialDays: 2 }],
@@ -146,11 +161,29 @@ describe("fluent public contract", () => {
     expect(h.requests[0]!.body).not.toHaveProperty("testmode");
     expect(() => builder.inLiveMode()).toThrow(/mode/);
   });
+  it("exposes the hosted URL and API fields on one-off checkouts too", async () => {
+    const body = {
+      id: "checkout_one_off",
+      customerId: null,
+      links: {
+        checkoutUrl: { href: "https://checkout.example.com/one-off" },
+        self: { href: "https://api.example.com/checkouts/one-off" },
+      },
+    };
+    const h = harness([{ body }]);
+    const checkout = await h.vatly
+      .checkoutBuilder()
+      .withItems([{ id: "product_1" }])
+      .create();
+    expect(checkout.getUrl()).toBe("https://checkout.example.com/one-off");
+    expect(checkout).toMatchObject(body);
+    expect(h.requests[0]!.body.products).toEqual([{ id: "product_1" }]);
+  });
   it("rejects missing products, redirects, invalid quantity and nonfuture trials before sending", () => {
     const h = harness();
     expect(() => h.vatly.checkoutBuilder().create()).toThrow(/product/);
-    expect(() => h.vatly.subscriptionBuilder().withQuantity(1.1)).toThrow(/integer/);
-    expect(() => h.vatly.subscriptionBuilder().withTrialEndsAt(new Date(0), 0)).toThrow(/Trial/);
+    expect(() => h.vatly.subscribe().withQuantity(1.1)).toThrow(/integer/);
+    expect(() => h.vatly.subscribe().withTrialEndsAt(new Date(0), 0)).toThrow(/Trial/);
     expect(() =>
       h.vatly
         .checkoutBuilder()

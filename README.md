@@ -42,13 +42,13 @@ const vatly = new Vatly({
   redirectUrlCanceled: 'https://app.example.com/canceled',
 });
 
-const checkout = await vatly.subscriptionBuilder({ vatlyId: 'customer_...' })
+const checkout = await vatly.subscribe({ vatlyId: 'customer_...' })
   .toPlan('subscription_plan_...')
   .withQuantity(3)
   .withTrialDays(14)
   .withLocale('de_AT')
   .create();
-// Redirect to checkout.links.checkoutUrl.href.
+// Redirect to checkout.getUrl().
 
 const customer = vatly.customer('customer_...');
 await customer.identity();                  // lazily fetched and cached per handle
@@ -61,6 +61,12 @@ for await (const match of vatly.customers.findByEmail('buyer@example.com')) {
 await vatly.oneOffProducts().list();         // complete typed SDK catalog surface
 await vatly.api.webhookEndpoints.list();    // SDK escape hatch for every operation
 ```
+
+`subscribe(profile)` follows Laravel's `Billable.subscribe()` naming and returns
+a subscription checkout builder; it sends no request until `create()`. For one-off
+or mixed carts, use `checkoutBuilder(profile).withItems([...]).create()`. Both
+builders return the full SDK checkout resource plus `getUrl()`, which returns the
+hosted payment URL. Direct SDK calls through `vatly.api` return plain resources.
 
 Builders are mutable per-flow objects. `payload()` returns a detached snapshot;
 repeated `create()` calls do not accumulate subscription products. Each create is

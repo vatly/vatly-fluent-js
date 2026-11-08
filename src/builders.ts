@@ -65,7 +65,11 @@ export class CheckoutBuilder {
       throw new FluentError("At least one product or subscription plan is required.");
     if (!body.redirectUrlSuccess || !body.redirectUrlCanceled)
       throw new FluentError("Success and cancellation redirect URLs are required.");
-    return this.wiring.api.checkouts.create(body, opts);
+    return this.wiring.api.checkouts.create(body, opts).then((checkout) =>
+      Object.assign(checkout, {
+        getUrl: () => checkout.links.checkoutUrl.href,
+      }),
+    );
   }
 }
 

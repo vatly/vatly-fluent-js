@@ -7,7 +7,8 @@ Source: `vatly/vatly-fluent-php` at
 | --- | --- |
 | ConfigurationInterface / Wiring / apiOnly | `new Vatly({ api: new VatlyClient(...), ... })` |
 | CustomerProfile DTO | structural `CustomerProfile` |
-| CheckoutBuilder / SubscriptionBuilder | same builders; withItems + create(overrides, requestOptions) |
+| checkoutBuilder / subscriptionBuilder | `vatly.checkoutBuilder(profile)` / `vatly.subscribe(profile)`; subscribe follows Laravel's Billable naming |
+| CheckoutBuilder / SubscriptionBuilder | withItems + create(overrides, requestOptions); checkout results retain SDK fields and add `getUrl()` |
 | CustomerService / CustomerHandle | `vatly.customers` / `vatly.customer(id)` |
 | SubscriptionHandle + derived state trait | `vatly.subscription(local)` / `.state()` |
 | OrderHandle | `vatly.order(id)`; local reversal repositories optional |

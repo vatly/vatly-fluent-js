@@ -30,7 +30,7 @@ export class Vatly {
   checkoutBuilder(profile: CustomerProfile = {}) {
     return new CheckoutBuilder(this.wiring, profile);
   }
-  subscriptionBuilder(profile: CustomerProfile = {}) {
+  subscribe(profile: CustomerProfile = {}) {
     return new SubscriptionBuilder(this.wiring, profile);
   }
   subscription(record: LocalSubscription) {
