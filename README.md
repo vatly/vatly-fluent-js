@@ -124,8 +124,15 @@ Null billing-webhook mandates do not wipe existing mandates; explicit `sync()`
 reconciles actual removal. Catalog/checkout/setup events are dispatch-only.
 
 `additionalWebhookReactions` run after built-ins and before the event dispatcher.
-Events are the SDK's discriminated `VatlyWebhookEvent` union, plus
-`local.order_created`/`local.subscription_created` on new local rows. All 32
+Events are the SDK's `VatlyWebhookEvent` union, plus
+`local.order_created`/`local.subscription_created` on new local rows. Local events
+and recognized SDK deliveries have `known: true`; future signed event names have
+`known: false` and `object: unknown`. Check `event.known` before switching on the
+name. Unsupported deliveries skip built-in billing mutations but still go through
+transactional deduplication, custom reactions, and dispatch. Your `webhookCalls`
+driver must retain the verified envelope for audit/triage, and the dispatcher must
+use durable storage/outbox writes before acknowledgement. A failed retention or
+reaction remains retryable; unknown events are not silently discarded. All 32
 delivery names remain available. Resource schemas are compile-time types, not
 runtime schema validation. Reconcile out-of-order snapshots with the API; this
 port does not claim event-time ordering across separate delivery ids.

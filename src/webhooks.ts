@@ -1,10 +1,10 @@
 import {
   type Chargeback,
+  type KnownWebhookEvent,
   type Order,
   type RawBody,
   type Refund,
   type Subscription,
-  type VatlyWebhookEvent,
   type VerifyOptions,
   constructWebhookEvent,
 } from "@getvatly/sdk";
@@ -30,7 +30,7 @@ export class WebhookProcessor {
       options,
     );
     return required(this.wiring.webhookCalls, "webhookCalls").process(event, async () => {
-      await this.react(event);
+      if (event.known) await this.react(event);
       for (const reaction of this.wiring.additionalWebhookReactions ?? [])
         if (reaction.supports(event)) await reaction.handle(event);
       await this.wiring.events?.dispatch(event);
@@ -63,7 +63,7 @@ export class WebhookProcessor {
     });
     return { created: record !== null, record };
   }
-  private async react(event: VatlyWebhookEvent): Promise<void> {
+  private async react(event: KnownWebhookEvent): Promise<void> {
     switch (event.eventName) {
       case "subscription.started": {
         if (!this.wiring.subscriptions) break;
@@ -79,6 +79,7 @@ export class WebhookProcessor {
           });
           if (record)
             await this.wiring.events?.dispatch({
+              known: true,
               eventName: "local.subscription_created",
               object: record,
             });
@@ -115,6 +116,7 @@ export class WebhookProcessor {
         const result = await this.persist<Order>(this.wiring.orders, event.object);
         if (result.created && result.record && event.eventName === "order.paid")
           await this.wiring.events?.dispatch({
+            known: true,
             eventName: "local.order_created",
             object: result.record,
           });

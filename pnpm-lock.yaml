@@ -377,7 +377,7 @@ packages:
     os: [win32]
 
   '@getvatly/sdk@file:vendor/getvatly-sdk-0.3.0-alpha.1.tgz':
-    resolution: {integrity: sha512-9Jo5HmyyABU81k8Fgw5u+l81S+6Su14UMCJZygRxmd/m+gWxqMU+ysykV12D4CHc4I3y+6IsYwIVbt/DtWqBMA==, tarball: file:vendor/getvatly-sdk-0.3.0-alpha.1.tgz}
+    resolution: {integrity: sha512-5d94OdaJ7uumoObFwMtVPMt9UEy4O8SI/N1nZzDaMNlCeDdOSkZXDcCPYPEf/ykoO1Opphj1ARlDwyHHD3z+WQ==, tarball: file:vendor/getvatly-sdk-0.3.0-alpha.1.tgz}
     version: 0.3.0-alpha.1
     engines: {node: '>=20'}
 

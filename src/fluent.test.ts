@@ -264,6 +264,34 @@ describe("fluent public contract", () => {
 });
 
 describe("signed webhook processing", () => {
+  it("retains future events through dispatch, retries failed retention, and deduplicates success", async () => {
+    const h = harness();
+    let fail = true;
+    h.wiring.events = {
+      dispatch: (event) => {
+        if (fail) throw new Error("triage storage unavailable");
+        h.dispatched.push(event);
+      },
+    };
+    const raw = envelope("subscription.started.v2", subscription);
+    const processor = h.vatly.webhookProcessor();
+    await expect(processor.handle(raw, "t=0,v1=bad")).rejects.toThrow();
+    expect(h.dispatched).toHaveLength(0);
+    await expect(processor.handle(raw, signature(raw))).rejects.toThrow("triage storage");
+    fail = false;
+    expect(await processor.handle(raw, signature(raw))).toBe(true);
+    expect(await processor.handle(raw, signature(raw))).toBe(false);
+    expect(h.dispatched).toHaveLength(1);
+    expect(h.dispatched[0]).toMatchObject({
+      known: false,
+      eventName: "subscription.started.v2",
+      object: subscription,
+    });
+    expect(h.subscriptions.all()).toHaveLength(0);
+    expect(h.orders.all()).toHaveLength(0);
+    expect(h.requests).toHaveLength(0);
+  });
+
   it("verifies before touching state, persists signed data, deduplicates, and dispatches after reactions", async () => {
     const h = harness();
     const raw = envelope("subscription.started", subscription);

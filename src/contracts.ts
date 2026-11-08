@@ -41,8 +41,8 @@ export interface ReversalRepository<T> extends Repository<Stored<T>> {
 }
 export type DomainEvent =
   | VatlyWebhookEvent
-  | { eventName: "local.order_created"; object: Stored<Order> }
-  | { eventName: "local.subscription_created"; object: LocalSubscription };
+  | { known: true; eventName: "local.order_created"; object: Stored<Order> }
+  | { known: true; eventName: "local.subscription_created"; object: LocalSubscription };
 export interface EventDispatcher {
   dispatch(event: DomainEvent): Awaitable<void>;
 }
@@ -52,6 +52,7 @@ export interface WebhookReaction {
 }
 export interface WebhookCalls {
   /**
+   * Retain the verified envelope (including unsupported events) for audit/triage.
    * Run work and mark signed event.id processed atomically, in the same transaction
    * as the wired repositories. Return false for an already committed id. Roll back
    * on failure so delivery retries can finish. Use an outbox for external effects.
