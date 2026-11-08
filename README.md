@@ -1,5 +1,7 @@
 # @getvatly/fluent
 
+> **Alpha — under active development. Every alpha release may include breaking changes. Pin exact versions during alpha.**
+
 Framework-agnostic TypeScript port of [vatly-fluent-php](https://github.com/vatly/vatly-fluent-php),
 built on `@getvatly/sdk`. No framework, database, Node builtins, or second HTTP client
 is required at runtime. ESM/CJS and matching declarations are included.
@@ -11,8 +13,6 @@ After the first npm publication, install both packages explicitly from `alpha`:
 ```sh
 npm install @getvatly/sdk@alpha @getvatly/fluent@alpha
 ```
-
-Alpha versions may include breaking changes; pin exact versions in production.
 
 ## Development
 
