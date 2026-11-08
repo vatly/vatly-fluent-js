@@ -4,7 +4,17 @@ Framework-agnostic TypeScript port of [vatly-fluent-php](https://github.com/vatl
 built on `@getvatly/sdk`. No framework, database, Node builtins, or second HTTP client
 is required at runtime. ESM/CJS and matching declarations are included.
 
-## Development (nothing is published yet)
+## Alpha installation
+
+After the first npm publication, install both packages explicitly from `alpha`:
+
+```sh
+npm install @getvatly/sdk@alpha @getvatly/fluent@alpha
+```
+
+Alpha versions may include breaking changes; pin exact versions in production.
+
+## Development
 
 Node 20+ and pnpm 9.15.0:
 
@@ -15,7 +25,7 @@ pnpm pack
 ```
 
 `vendor/getvatly-sdk-0.3.0-alpha.1.tgz` is a local build of the SDK, not a registry
-release. It makes private clones reproducible without publishing anything.
+release. It makes development reproducible before the initial SDK publication.
 See `vendor/README.md` for its source revision and checksum. Consumers install the
 SDK alongside Fluent (a peer dependency). The companion private
 `sandervanhooft/vatly-nextjs-demo` includes both tarballs.
@@ -131,5 +141,32 @@ For isolated tests, inject an SDK `fetch` implementation rather than inventing a
 parallel FakeVatly API. `pnpm test` exercises the public fluent surface through
 the actual installed SDK; the demo runs both packages inside real local workerd.
 
+## Publishing
+
+1. Keep the source repository `vatly/vatly-fluent-js` public when publishing with
+   provenance. The npm package name stays `@getvatly/fluent`.
+2. Publish `@getvatly/sdk@0.3.0-alpha.1` first. The release workflow checks that a
+   compatible SDK peer is available on npm before publishing Fluent.
+3. For the first publication, an npm owner with publish access to `@getvatly` must
+   create a short-lived granular token with **Read and write (stage only)** access
+   to that scope. Store it as the GitHub organization Actions secret `NPM_TOKEN`,
+   restricted to the SDK and Fluent repositories. Never commit it. Remove any
+   repository-level secret of the same name, which would override the org secret.
+4. Commit the release changes and publish a GitHub prerelease tagged
+   `v0.1.0-alpha.1` at that commit. `.github/workflows/release.yml` verifies the
+   version, runs `pnpm check`, and stages the package with provenance and the
+   `alpha` tag. Pushing a Git tag alone does not trigger staging.
+5. Review the candidate in npm's **Staged Packages** tab and approve it with 2FA.
+   Staging a new package creates a public `0.0.0-stage` placeholder, not a live alpha.
+6. In npm package settings, add a GitHub Actions trusted publisher: organization
+   `vatly`, repository `vatly-fluent-js`, workflow filename `release.yml`, no
+   environment. Keep it stage-only; do not allow direct `npm publish`. After
+   configuring both packages, remove the shared bootstrap secret and revoke its
+   token. Validate each trusted publisher by staging the next version within
+   npm's two-day window.
+
+See [npm staged publishing](https://docs.npmjs.com/staged-publishing) and
+[trusted publishing](https://docs.npmjs.com/trusted-publishers).
+
 MIT. See [PORTING.md](PORTING.md) for the exact upstream revision and deliberate
-TypeScript adaptations. No package or release has been published.
+TypeScript adaptations.

@@ -4,7 +4,12 @@
   "description": "Framework-agnostic fluent billing on top of @getvatly/sdk",
   "license": "MIT",
   "type": "module",
-  "repository": "github:sandervanhooft/vatly-fluent-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vatly/vatly-fluent-js.git"
+  },
+  "homepage": "https://github.com/vatly/vatly-fluent-js#readme",
+  "bugs": { "url": "https://github.com/vatly/vatly-fluent-js/issues" },
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -17,7 +22,7 @@
   "sideEffects": false,
   "engines": { "node": ">=20" },
   "packageManager": "pnpm@9.15.0",
-  "publishConfig": { "access": "public", "tag": "alpha" },
+  "publishConfig": { "access": "public", "tag": "alpha", "provenance": true },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean --platform neutral --target es2022",
     "typecheck": "tsc --noEmit",

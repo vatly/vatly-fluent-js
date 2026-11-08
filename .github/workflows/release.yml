@@ -1,0 +1,50 @@
+name: Release
+
+# Configure npm trusted publishing for vatly/vatly-fluent-js and release.yml.
+# NPM_TOKEN is an optional short-lived stage-only token for the first publication,
+# before the package exists on npm. Remove it after configuring trusted publishing.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Stage on npm for approval
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+      - name: Install npm with staged publishing support
+        run: npm install --global npm@11
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Verify tag matches package.json version
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Release tag ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
+            exit 1
+          fi
+      - name: Check
+        run: pnpm check
+      - name: Verify SDK peer is published
+        run: |
+          SDK_RANGE="$(node -p "require('./package.json').peerDependencies['@getvatly/sdk']")"
+          npm view "@getvatly/sdk@$SDK_RANGE" version
+      - name: Stage for maintainer approval
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [[ "$VERSION" == *-* ]]; then DIST_TAG=alpha; else DIST_TAG=latest; fi
+          npm stage publish --provenance --access public --tag "$DIST_TAG"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
