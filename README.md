@@ -8,10 +8,10 @@ is required at runtime. ESM/CJS and matching declarations are included.
 
 ## Alpha installation
 
-After the first npm publication, install both packages explicitly from `alpha`:
+After npm approval of this release, install both packages with exact versions:
 
 ```sh
-npm install @getvatly/sdk@alpha @getvatly/fluent@alpha
+npm install --save-exact @getvatly/sdk@0.3.0-alpha.2 @getvatly/fluent@0.1.0-alpha.1
 ```
 
 ## Development
@@ -24,11 +24,9 @@ pnpm check
 pnpm pack
 ```
 
-`vendor/getvatly-sdk-0.3.0-alpha.1.tgz` is a local build of the SDK, not a registry
-release. It makes development reproducible before the initial SDK publication.
-See `vendor/README.md` for its source revision and checksum. Consumers install the
-SDK alongside Fluent (a peer dependency). The companion private
-`sandervanhooft/vatly-nextjs-demo` includes both tarballs.
+Development and consumers both use the published registry SDK, not a vendored
+snapshot. Install the SDK alongside Fluent (a peer dependency). This release pins
+SDK `0.3.0-alpha.2` because alpha releases may contain breaking changes.
 
 ## API-only usage
 
@@ -158,8 +156,8 @@ the actual installed SDK; the demo runs both packages inside real local workerd.
 
 1. Keep the source repository `vatly/vatly-fluent-js` public when publishing with
    provenance. The npm package name stays `@getvatly/fluent`.
-2. Publish `@getvatly/sdk@0.3.0-alpha.1` first. The release workflow checks that a
-   compatible SDK peer is available on npm before publishing Fluent.
+2. Publish `@getvatly/sdk@0.3.0-alpha.2` first. The release workflow checks that the
+   exact SDK peer is available on npm before staging Fluent.
 3. For the first publication, an npm owner with publish access to `@getvatly` must
    create a short-lived granular token with **Read and write (stage only)** access
    to that scope. Store it as the GitHub organization Actions secret `NPM_TOKEN`,

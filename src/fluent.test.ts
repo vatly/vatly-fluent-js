@@ -265,7 +265,7 @@ describe("fluent public contract", () => {
     await handle.resume();
     expect(handle.state().recurring).toBe(true);
     await handle.cancel({ immediately: true });
-    expect(h.requests[3]!.url).toContain("immediately=true");
+    expect(new URL(h.requests[3]!.url).searchParams.get("immediately")).toBe("1");
   });
   it.each([null, "2030-01-01T00:00:00Z", "2020-01-01T00:00:00Z"])(
     "matches PHP endsAt semantics for %s",
