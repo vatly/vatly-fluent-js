@@ -6,9 +6,14 @@ Framework-agnostic TypeScript port of [vatly-fluent-php](https://github.com/vatl
 built on `@getvatly/sdk`. No framework, database, Node builtins, or second HTTP client
 is required at runtime. ESM/CJS and matching declarations are included.
 
+Start with the [integration guides](docs/README.md) for configuration, customer
+bindings, storage, checkouts, subscriptions, the portal, webhooks, orders, and testing.
+For remote field details, see the [API reference](https://docs.vatly.com/api-reference);
+the [OpenAPI spec](https://docs.vatly.com/openapi.yaml) is also available for tooling.
+
 ## Alpha installation
 
-After npm approval of this release, install both packages with exact versions:
+Install the published alpha pair with exact versions:
 
 ```sh
 npm install --save-exact @getvatly/sdk@0.3.0-alpha.2 @getvatly/fluent@0.1.0-alpha.1
