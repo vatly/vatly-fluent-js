@@ -2,9 +2,10 @@
 
 > **Alpha — under active development. Every alpha release may include breaking changes. Pin exact versions during alpha.**
 
-Framework-agnostic TypeScript port of [vatly-fluent-php](https://github.com/vatly/vatly-fluent-php),
-built on `@getvatly/sdk`. No framework, database, Node builtins, or second HTTP client
-is required at runtime. ESM/CJS and matching declarations are included.
+Framework-agnostic TypeScript billing for [Vatly](https://vatly.com), the European merchant of record for AI, software and digital products.
+Built on `@getvatly/sdk` and ported from [vatly-fluent-php](https://github.com/vatly/vatly-fluent-php).
+No framework, database, Node builtins, or second HTTP client is required at runtime.
+ESM/CJS and matching declarations are included.
 
 Start with the [integration guides](docs/README.md) for configuration, customer
 bindings, storage, checkouts, subscriptions, the portal, webhooks, orders, and testing.
@@ -80,15 +81,17 @@ second argument. Trial end dates round up to whole days. The key, not a JSON
 ## Host persistence and handles
 
 Supply `bindings`, `orders`, `subscriptions`, optional `refunds`/`chargebacks`,
-`webhookCalls`, and `events` through `Wiring`. All contracts accept synchronous
-or asynchronous drivers. `Reader` and `Writer` can be used independently.
+`webhookCalls`, and `events` through `Wiring`. Contracts accept synchronous or
+asynchronous drivers, except `webhookCalls.process`, which must return a promise.
+`Reader` and `Writer` can be used independently.
 Missing wiring fails when that feature is used, not at API-only construction.
 
 `vatly.customers.createFor(hostId, profile)` creates and binds a customer;
 `createUnattributed` records an anonymous one; `attribute` links an existing id.
 Binding drivers must enforce unique host AND Vatly ids atomically. A failed bind
-after an API create cannot roll back the remote creation; recover by email and
-attribute, and use stable API idempotency keys on retried creates.
+after an API create cannot roll back the remote creation. Reconcile the customer
+and verify ownership before using `attribute`; email matching alone is not proof.
+Use stable API idempotency keys on retried creates.
 
 `vatly.subscription(localRecord)` supports `swap`, `swapAndInvoice`,
 `swapWithoutCharge`, `cancel`, `resume`, `sync`, `scheduledUpdate`,
@@ -96,6 +99,10 @@ attribute, and use stable API idempotency keys on retried creates.
 waits for webhooks to update the local end date. `state()` derives PHP's
 active/valid/recurring/cancelled/grace/ended flags from `endsAt`; read Vatly's
 `status` separately (e.g. paused is not represented by those legacy predicates).
+
+In `0.1.0-alpha.1`, cancellation reactions and `sync()` can mistake the
+cancellation request time for the grace deadline. Do not use `state()` alone to
+revoke access; see the [grace-period limitation](docs/Subscriptions.md#grace-period-limitation-in-010-alpha1).
 
 `vatly.order(id)` memoizes the API order and exposes invoice URL, lines, reversal
 predicates, and local refund/chargeback lists. Money remains decimal-string
@@ -147,7 +154,8 @@ runtime schema validation. Reconcile out-of-order snapshots with the API; this
 port does not claim event-time ordering across separate delivery ids.
 
 Catch SDK `VatlyError` subclasses unchanged; Fluent validation/wiring failures use
-`FluentError`. No PHP-style exception wrapper hides status/details/cause.
+`FluentError` in most cases. Missing billing-update redirects currently throw a
+plain `Error`. No PHP-style exception wrapper hides SDK status/details/cause.
 
 ## Test helpers and edge
 
