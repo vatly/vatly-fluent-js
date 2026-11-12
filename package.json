@@ -22,7 +22,7 @@
   "sideEffects": false,
   "engines": { "node": ">=20" },
   "packageManager": "pnpm@9.15.0",
-  "publishConfig": { "access": "public", "tag": "alpha", "provenance": true },
+  "publishConfig": { "access": "public", "tag": "latest", "provenance": true },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean --platform neutral --target es2022",
     "typecheck": "tsc --noEmit",

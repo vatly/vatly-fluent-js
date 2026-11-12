@@ -161,25 +161,25 @@ the actual installed SDK; the demo runs both packages inside real local workerd.
 
 1. Keep the source repository `vatly/vatly-fluent-js` public when publishing with
    provenance. The npm package name stays `@getvatly/fluent`.
-2. Publish `@getvatly/sdk@0.3.0-alpha.2` first. The release workflow checks that the
+2. Publish the SDK version required by `package.json` first. The workflow checks that the
    exact SDK peer is available on npm before staging Fluent.
-3. For the first publication, an npm owner with publish access to `@getvatly` must
-   create a short-lived granular token with **Read and write (stage only)** access
-   to that scope. Store it as the GitHub organization Actions secret `NPM_TOKEN`,
-   restricted to the SDK and Fluent repositories. Never commit it. Remove any
-   repository-level secret of the same name, which would override the org secret.
-4. Commit the release changes and publish a GitHub prerelease tagged
-   `v0.1.0-alpha.1` at that commit. `.github/workflows/release.yml` verifies the
-   version, runs `pnpm check`, and stages the package with provenance and the
-   `alpha` tag. Pushing a Git tag alone does not trigger staging.
+3. Configure a GitHub Actions trusted publisher in npm package settings:
+   organization `vatly`, repository `vatly-fluent-js`, workflow `release.yml`, no
+   environment. Stage-only permission is sufficient; no npm token, direct publish,
+   or dist-tag management permission is needed.
+4. Bump the version and changelog, commit, and publish a GitHub release tagged
+   `vX.Y.Z` matching `package.json` (mark alpha releases as prereleases).
+   `.github/workflows/release.yml` verifies the version, runs `pnpm check`, and
+   stages with `npm stage publish --provenance --access public --tag latest`.
+   Pushing a Git tag alone does not trigger staging.
 5. Review the candidate in npm's **Staged Packages** tab and approve it with 2FA.
-   Staging a new package creates a public `0.0.0-stage` placeholder, not a live alpha.
-6. In npm package settings, add a GitHub Actions trusted publisher: organization
-   `vatly`, repository `vatly-fluent-js`, workflow filename `release.yml`, no
-   environment. Keep it stage-only; do not allow direct `npm publish`. After
-   configuring both packages, remove the shared bootstrap secret and revoke its
-   token. Validate each trusted publisher by staging the next version within
-   npm's two-day window.
+   Approval publishes it and updates `latest`, including for alpha versions.
+   Approve releases in order: approving an older candidate later can move `latest`
+   backwards. The staged tag cannot be changed after staging.
+
+`latest` is the supported install channel during alpha; pin exact versions for
+stability. Existing `alpha` dist-tags are legacy pointers and are not advanced by
+this workflow.
 
 See [npm staged publishing](https://docs.npmjs.com/staged-publishing) and
 [trusted publishing](https://docs.npmjs.com/trusted-publishers).
