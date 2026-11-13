@@ -1,6 +1,6 @@
 {
   "name": "@getvatly/fluent",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Framework-agnostic TypeScript billing for Vatly, the European Merchant of Record for AI, software and digital products",
   "keywords": ["vatly", "merchant-of-record", "billing", "payments", "subscriptions", "vat", "ai", "typescript"],
   "license": "MIT",
@@ -32,9 +32,9 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "prepack": "pnpm build"
   },
-  "peerDependencies": { "@getvatly/sdk": "0.3.0-alpha.2" },
+  "peerDependencies": { "@getvatly/sdk": "0.3.0-alpha.4" },
   "devDependencies": {
-    "@getvatly/sdk": "0.3.0-alpha.2",
+    "@getvatly/sdk": "0.3.0-alpha.4",
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.0.0",
     "typescript": "^5.6.0",

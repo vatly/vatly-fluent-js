@@ -325,6 +325,37 @@ describe("signed webhook processing", () => {
     expect(h.requests).toHaveLength(0);
   });
 
+  it("persists paid order lines with their subscription links", async () => {
+    const h = harness();
+    const line = (id: string, relatedResources: unknown) => ({
+      id,
+      resource: "orderline",
+      productType: "subscription_plan",
+      productId: "subscription_plan_1",
+      relatedResources,
+    });
+    const order = {
+      id: "order_1",
+      customerId: "customer_1",
+      status: "paid",
+      lines: [
+        line("line_signup", { subscriptionId: "sub_1" }),
+        line("line_unresolved", { subscriptionId: null }),
+        { ...line("line_one_off", null), productType: "one_off_product" },
+      ],
+    };
+    const raw = envelope("order.paid", order);
+    expect(await h.vatly.webhookProcessor().handle(raw, signature(raw))).toBe(true);
+    const [stored] = h.orders.all();
+    expect(stored?.lines.map((l) => l.relatedResources?.subscriptionId ?? null)).toEqual([
+      "sub_1",
+      null,
+      null,
+    ]);
+    expect(stored?.lines[2]?.relatedResources).toBeNull();
+    expect(h.dispatched.map((e) => e.eventName)).toEqual(["local.order_created", "order.paid"]);
+  });
+
   it("verifies before touching state, persists signed data, deduplicates, and dispatches after reactions", async () => {
     const h = harness();
     const raw = envelope("subscription.started", subscription);

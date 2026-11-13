@@ -12,8 +12,8 @@ importers:
         specifier: ^1.9.4
         version: 1.9.4
       '@getvatly/sdk':
-        specifier: 0.3.0-alpha.2
-        version: 0.3.0-alpha.2
+        specifier: 0.3.0-alpha.4
+        version: 0.3.0-alpha.4
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.5
@@ -376,8 +376,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@getvatly/sdk@0.3.0-alpha.2':
-    resolution: {integrity: sha512-/WqzwfktxjxgYK4zkTm29MpKPz2BI2i0kPxzGYDu7KcrMEp0SmdEefCSr4NMgiaQ/awoBHfibGX7zhLRsDwu2w==}
+  '@getvatly/sdk@0.3.0-alpha.4':
+    resolution: {integrity: sha512-SHcvJMzJ+19r9dwQAb4+GhdQQlc6c9DfsSLew/8ZIzVj6fckydU21F3xWxAHxIp5Awmt0r+yVSQbUvOA57QWaA==}
     engines: {node: '>=20'}
 
   '@jridgewell/gen-mapping@0.3.13':
@@ -1089,7 +1089,7 @@ snapshots:
   '@esbuild/win32-x64@0.27.7':
     optional: true
 
-  '@getvatly/sdk@0.3.0-alpha.2': {}
+  '@getvatly/sdk@0.3.0-alpha.4': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

@@ -17,7 +17,7 @@ the [OpenAPI spec](https://docs.vatly.com/openapi.yaml) is also available for to
 Install the published alpha pair with exact versions:
 
 ```sh
-npm install --save-exact @getvatly/sdk@0.3.0-alpha.2 @getvatly/fluent@0.1.0-alpha.1
+npm install --save-exact @getvatly/sdk@0.3.0-alpha.4 @getvatly/fluent@0.1.0-alpha.2
 ```
 
 ## Development
@@ -32,7 +32,7 @@ pnpm pack
 
 Development and consumers both use the published registry SDK, not a vendored
 snapshot. Install the SDK alongside Fluent (a peer dependency). This release pins
-SDK `0.3.0-alpha.2` because alpha releases may contain breaking changes.
+SDK `0.3.0-alpha.4` because alpha releases may contain breaking changes.
 
 ## API-only usage
 
@@ -100,9 +100,9 @@ waits for webhooks to update the local end date. `state()` derives PHP's
 active/valid/recurring/cancelled/grace/ended flags from `endsAt`; read Vatly's
 `status` separately (e.g. paused is not represented by those legacy predicates).
 
-In `0.1.0-alpha.1`, cancellation reactions and `sync()` can mistake the
+In this alpha, cancellation reactions and `sync()` can mistake the
 cancellation request time for the grace deadline. Do not use `state()` alone to
-revoke access; see the [grace-period limitation](docs/Subscriptions.md#grace-period-limitation-in-010-alpha1).
+revoke access; see the [grace-period limitation](docs/Subscriptions.md#grace-period-limitation-in-this-alpha).
 
 `vatly.order(id)` memoizes the API order and exposes invoice URL, lines, reversal
 predicates, and local refund/chargeback lists. Money remains decimal-string

@@ -5,6 +5,24 @@ Every alpha release may include breaking changes; pin exact versions.
 
 ## [Unreleased]
 
+## 0.1.0-alpha.2
+
+### Added
+
+- Order lines are typed with `relatedResources.subscriptionId`, the subscription
+  a signup, renewal or immediate-update line belongs to. `relatedResources` is
+  null on historical and unrelated lines, and may be absent from older payloads.
+  `subscriptionId` is null while a signup's subscription is not yet available.
+  `productType` and `productId` keep their meaning: signup lines still reference
+  the plan. Persisted `order.paid` orders and `vatly.order(id).lines()` carry the
+  field. The [orders guide](docs/Orders.md#link-order-lines-to-subscriptions)
+  shows how to read it.
+
+### Dependencies
+
+- Requires `@getvatly/sdk@0.3.0-alpha.4` as an exact peer dependency; upgrade both
+  packages together.
+
 ## 0.1.0-alpha.1
 
 ### Added
