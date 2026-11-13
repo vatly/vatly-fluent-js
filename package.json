@@ -1,7 +1,7 @@
 {
   "name": "@getvatly/fluent",
   "version": "0.1.0-alpha.1",
-  "description": "Framework-agnostic TypeScript billing for Vatly, the European merchant of record for AI, software and digital products",
+  "description": "Framework-agnostic TypeScript billing for Vatly, the European Merchant of Record for AI, software and digital products",
   "license": "MIT",
   "type": "module",
   "repository": {

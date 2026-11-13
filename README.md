@@ -2,7 +2,7 @@
 
 > **Alpha — under active development. Every alpha release may include breaking changes. Pin exact versions during alpha.**
 
-Framework-agnostic TypeScript billing for [Vatly](https://vatly.com), the European merchant of record for AI, software and digital products.
+Framework-agnostic TypeScript billing for [Vatly](https://vatly.com), the European Merchant of Record for AI, software and digital products.
 Built on `@getvatly/sdk` and ported from [vatly-fluent-php](https://github.com/vatly/vatly-fluent-php).
 No framework, database, Node builtins, or second HTTP client is required at runtime.
 ESM/CJS and matching declarations are included.
