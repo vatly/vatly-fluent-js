@@ -1,6 +1,6 @@
 # @getvatly/fluent
 
-> **Alpha — under active development. Every alpha release may include breaking changes. Pin exact versions during alpha.**
+> **Alpha — under active development. Every alpha release may include breaking changes. Lock the version you install and review the release notes before upgrading.**
 
 Framework-agnostic TypeScript billing for [Vatly](https://vatly.com), the European Merchant of Record for AI, software and digital products.
 Built on `@getvatly/sdk` and ported from [vatly-fluent-php](https://github.com/vatly/vatly-fluent-php).
@@ -14,10 +14,10 @@ the [OpenAPI spec](https://docs.vatly.com/openapi.yaml) is also available for to
 
 ## Alpha installation
 
-Install the published alpha pair with exact versions:
+Install the latest alpha of both packages; `--save-exact` pins the installed versions:
 
 ```sh
-npm install --save-exact @getvatly/sdk@0.3.0-alpha.4 @getvatly/fluent@0.1.0-alpha.2
+npm install --save-exact @getvatly/sdk @getvatly/fluent
 ```
 
 ## Development
@@ -31,8 +31,8 @@ pnpm pack
 ```
 
 Development and consumers both use the published registry SDK, not a vendored
-snapshot. Install the SDK alongside Fluent (a peer dependency). This release pins
-SDK `0.3.0-alpha.4` because alpha releases may contain breaking changes.
+snapshot. Install the SDK alongside Fluent (a peer dependency). Each Fluent release
+requires one exact SDK version because alpha releases may contain breaking changes.
 
 ## API-only usage
 
