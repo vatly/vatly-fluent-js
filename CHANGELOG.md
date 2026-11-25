@@ -5,6 +5,13 @@ Every alpha release may include breaking changes; pin exact versions.
 
 ## [Unreleased]
 
+### Changed
+
+- The webhook processor refuses a webhook whose `testmode` differs from the API
+  key's mode, before anything is stored. It throws the new
+  `WebhookModeMismatchError`, which extends the SDK's
+  `VatlyInvalidSignatureError`, so handlers that catch that error refuse it too.
+
 ## 0.1.0-alpha.3
 
 ### Added

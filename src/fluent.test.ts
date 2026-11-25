@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import {
   type Subscription,
   VatlyClient,
+  VatlyInvalidSignatureError,
   VatlyNotFoundError,
   type VatlyWebhookEvent,
 } from "@getvatly/sdk";
@@ -11,6 +12,7 @@ import {
   type LocalSubscription,
   type Repository,
   Vatly,
+  WebhookModeMismatchError,
   type Wiring,
   subscriptionState,
 } from "./index.js";
@@ -346,6 +348,34 @@ describe("signed webhook processing", () => {
     expect(h.subscriptions.all()).toHaveLength(0);
     expect(h.orders.all()).toHaveLength(0);
     expect(h.requests).toHaveLength(0);
+  });
+
+  it("refuses a webhook for the other mode than the API key before storing anything", async () => {
+    const h = harness();
+    let claimed = false;
+    h.wiring.webhookCalls = {
+      process: async () => {
+        claimed = true;
+        return true;
+      },
+    };
+    const raw = JSON.stringify({
+      ...JSON.parse(envelope("subscription.started", subscription)),
+      testmode: false,
+    });
+    const error = await h.vatly
+      .webhookProcessor()
+      .handle(raw, signature(raw))
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(WebhookModeMismatchError);
+    expect(error).toBeInstanceOf(VatlyInvalidSignatureError);
+    expect((error as WebhookModeMismatchError).webhookTestmode).toBe(false);
+    expect((error as Error).message).toBe(
+      "This Vatly webhook is for live mode, but the API key is for test mode.",
+    );
+    expect(claimed).toBe(false);
+    expect(h.subscriptions.all()).toHaveLength(0);
+    expect(h.dispatched).toHaveLength(0);
   });
 
   it("stores refund metadata, as null when an older delivery omits it", async () => {

@@ -5,6 +5,7 @@ import {
   type RawBody,
   type Refund,
   type Subscription,
+  VatlyInvalidSignatureError,
   type VerifyOptions,
   constructWebhookEvent,
 } from "@getvatly/sdk";
@@ -15,6 +16,21 @@ import {
   type Wiring,
   required,
 } from "./contracts.js";
+
+/**
+ * A correctly signed webhook for the other mode than the API key: a test-mode
+ * event while the key is live, or the reverse. It is refused before anything is
+ * stored. It extends `VatlyInvalidSignatureError`, so handlers that catch that
+ * refuse it too.
+ */
+export class WebhookModeMismatchError extends VatlyInvalidSignatureError {
+  override name = "WebhookModeMismatchError";
+  constructor(readonly webhookTestmode: boolean) {
+    const webhookMode = webhookTestmode ? "test" : "live";
+    const keyMode = webhookTestmode ? "live" : "test";
+    super(`This Vatly webhook is for ${webhookMode} mode, but the API key is for ${keyMode} mode.`);
+  }
+}
 
 /** Signed snapshots are authoritative; processing does not make follow-up API requests. */
 export class WebhookProcessor {
@@ -29,6 +45,8 @@ export class WebhookProcessor {
       required(this.wiring.webhookSecret, "webhookSecret"),
       options,
     );
+    if (event.testmode !== (this.wiring.api.mode === "test"))
+      throw new WebhookModeMismatchError(event.testmode);
     return required(this.wiring.webhookCalls, "webhookCalls").process(event, async () => {
       if (event.known) await this.react(event);
       for (const reaction of this.wiring.additionalWebhookReactions ?? [])
