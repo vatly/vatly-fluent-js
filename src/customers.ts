@@ -6,7 +6,13 @@ import type {
   RequestOptions,
   UpdateCustomerRequest,
 } from "@getvatly/sdk";
-import { type CustomerProfile, FluentError, type Wiring, required } from "./contracts.js";
+import {
+  type CustomerProfile,
+  FluentError,
+  type Wiring,
+  assertMetadata,
+  required,
+} from "./contracts.js";
 
 export class CustomerHandle {
   private cached?: Customer;
@@ -65,6 +71,7 @@ export class CustomerService {
   ) {
     const email = extra.email ?? profile.email;
     if (!email) throw new FluentError("An email is required to create a customer.");
+    assertMetadata(extra.metadata);
     return this.wiring.api.customers.create({ name: profile.name, ...extra, email }, opts);
   }
   async createUnattributed(

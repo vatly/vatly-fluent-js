@@ -82,6 +82,22 @@ export function required<T>(value: T | undefined, name: string): T {
   return value;
 }
 
+/** Rejects metadata the API would answer with 422, before any request is sent. */
+export function assertMetadata(metadata: unknown): void {
+  if (metadata === undefined || metadata === null) return;
+  if (typeof metadata !== "object" || Array.isArray(metadata))
+    throw new FluentError("Metadata must be an object of string values.");
+  const entries = Object.entries(metadata);
+  if (entries.length > 50) throw new FluentError("Metadata allows at most 50 keys.");
+  for (const [key, value] of entries) {
+    if (key.length > 40) throw new FluentError(`Metadata key "${key}" exceeds 40 characters.`);
+    if (typeof value !== "string")
+      throw new FluentError(`Metadata value for "${key}" must be a string.`);
+    if (value.length > 500)
+      throw new FluentError(`Metadata value for "${key}" exceeds 500 characters.`);
+  }
+}
+
 /** PHP's endsAt-based predicates; not a substitute for Vatly's status field. */
 export function subscriptionState(endsAt: string | null, now = Date.now()) {
   const cancelled = endsAt !== null;

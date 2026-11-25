@@ -134,7 +134,12 @@ export class WebhookProcessor {
       case "refund.completed":
       case "refund.failed":
       case "refund.canceled":
-        if (this.wiring.refunds) await this.persist<Refund>(this.wiring.refunds, event.object);
+        // Deliveries frozen before refunds carried metadata omit it; store it as null.
+        if (this.wiring.refunds)
+          await this.persist<Refund>(this.wiring.refunds, {
+            ...event.object,
+            metadata: event.object.metadata ?? null,
+          });
         break;
       case "order.chargeback_received":
       case "order.chargeback_reversed":

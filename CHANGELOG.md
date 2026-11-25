@@ -5,6 +5,29 @@ Every alpha release may include breaking changes; pin exact versions.
 
 ## [Unreleased]
 
+## 0.1.0-alpha.3
+
+### Added
+
+- Refunds carry `metadata`, the metadata sent when the refund was created, or
+  null when none was sent. Stored refunds from `refund.*` webhooks always have
+  the field; deliveries signed before it existed are stored with `null`.
+
+### Changed
+
+- Checkout and customer creation reject metadata the API would refuse (a
+  non-string value, more than 50 keys, a key over 40 characters or a value over
+  500 characters) with a `FluentError` before sending the request. The API
+  answers these with `422` now, so no request that succeeded before is affected.
+- A checkout `products[].trialDays` below 1 passed through `withItems` is
+  rejected by the SDK with a `RangeError` before sending. `withTrialDays` and
+  `withTrialEndsAt` already required at least one day.
+
+### Dependencies
+
+- Requires `@getvatly/sdk@0.3.0-alpha.5` as an exact peer dependency; upgrade both
+  packages together.
+
 ## 0.1.0-alpha.2
 
 ### Added

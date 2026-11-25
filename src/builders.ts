@@ -5,7 +5,7 @@ import type {
   Metadata,
   RequestOptions,
 } from "@getvatly/sdk";
-import { type CustomerProfile, FluentError, type Wiring } from "./contracts.js";
+import { type CustomerProfile, FluentError, type Wiring, assertMetadata } from "./contracts.js";
 
 export class CheckoutBuilder {
   protected data: CreateCheckoutRequest;
@@ -65,6 +65,7 @@ export class CheckoutBuilder {
       throw new FluentError("At least one product or subscription plan is required.");
     if (!body.redirectUrlSuccess || !body.redirectUrlCanceled)
       throw new FluentError("Success and cancellation redirect URLs are required.");
+    assertMetadata(body.metadata);
     return this.wiring.api.checkouts.create(body, opts).then((checkout) =>
       Object.assign(checkout, {
         getUrl: () => checkout.links.checkoutUrl.href,

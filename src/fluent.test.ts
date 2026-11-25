@@ -193,6 +193,29 @@ describe("fluent public contract", () => {
     ).toThrow(/redirect/);
     expect(h.requests).toHaveLength(0);
   });
+  it("rejects metadata outside the API limits before sending and accepts it at the limits", async () => {
+    const h = harness([{ body: { id: "checkout_1", links: { checkoutUrl: { href: "u" } } } }]);
+    const checkout = (metadata: unknown) =>
+      h.vatly
+        .checkoutBuilder()
+        .withItems([{ id: "product_1" }])
+        .withMetadata(metadata as Record<string, string>);
+    const keys = (n: number) => Object.fromEntries([...Array(n)].map((_, i) => [`k${i}`, "v"]));
+    expect(() => checkout({ count: 1 }).create()).toThrow(/must be a string/);
+    expect(() => checkout({ ["k".repeat(41)]: "v" }).create()).toThrow(/40 characters/);
+    expect(() => checkout({ note: "v".repeat(501) }).create()).toThrow(/500 characters/);
+    expect(() => checkout(keys(51)).create()).toThrow(/50 keys/);
+    await expect(
+      h.vatly.customers.createUnattributed(
+        { email: "a@b.com" },
+        { metadata: { n: 1 } as unknown as Record<string, string> },
+      ),
+    ).rejects.toThrow(/must be a string/);
+    expect(h.requests).toHaveLength(0);
+    const atLimit = { ...keys(49), ["k".repeat(40)]: "v".repeat(500) };
+    await checkout(atLimit).create();
+    expect(h.requests[0]!.body.metadata).toEqual(atLimit);
+  });
   it("preserves explicit null identity updates and refreshes memoized handles", async () => {
     const h = harness([
       { body: { id: "c", name: "Before", email: "a@b.com" } },
@@ -323,6 +346,29 @@ describe("signed webhook processing", () => {
     expect(h.subscriptions.all()).toHaveLength(0);
     expect(h.orders.all()).toHaveLength(0);
     expect(h.requests).toHaveLength(0);
+  });
+
+  it("stores refund metadata, as null when an older delivery omits it", async () => {
+    const h = harness();
+    const refunds = repo<import("./index.js").Stored<import("@getvatly/sdk").Refund>>();
+    h.wiring.refunds = { ...refunds, listForOrder: () => [], listForCustomer: () => [] };
+    const refund = {
+      id: "refund_1",
+      orderId: "order_1",
+      customerId: "customer_1",
+      status: "completed",
+    };
+    for (const [eventName, object] of [
+      ["refund.completed", refund],
+      ["refund.completed", { ...refund, id: "refund_2", metadata: { reason: "dup" } }],
+    ] as const) {
+      const raw = envelope(eventName, object);
+      expect(await h.vatly.webhookProcessor().handle(raw, signature(raw))).toBe(true);
+    }
+    expect(refunds.all().map((r) => [r.id, r.metadata])).toEqual([
+      ["refund_1", null],
+      ["refund_2", { reason: "dup" }],
+    ]);
   });
 
   it("persists paid order lines with their subscription links", async () => {
