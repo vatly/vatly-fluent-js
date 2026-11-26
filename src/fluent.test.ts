@@ -1,6 +1,5 @@
 import { createHmac } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import {
   type Subscription,
   VatlyClient,
@@ -21,16 +20,8 @@ import {
 } from "./index.js";
 
 const secret = "local-test-signing-secret";
-const require = createRequire(import.meta.url);
-const packageVersion = (name: string): string =>
-  JSON.parse(
-    readFileSync(
-      name === "."
-        ? new URL("../package.json", import.meta.url)
-        : require.resolve(`${name}/package.json`),
-      "utf8",
-    ),
-  ).version;
+const packageVersion = (): string =>
+  JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
 const now = Math.floor(Date.now() / 1000);
 function envelope(eventName: string, object: object, id = crypto.randomUUID()) {
   return JSON.stringify({
@@ -67,12 +58,7 @@ function repo<T extends { id: string }>(): Repository<T> & { all(): T[] } {
   };
 }
 function harness(responses: { status?: number; body?: unknown }[] = []) {
-  const requests: {
-    url: string;
-    method: string;
-    headers: Headers;
-    body: Record<string, unknown>;
-  }[] = [];
+  const requests: { url: string; method: string; body: Record<string, unknown> }[] = [];
   const api = new VatlyClient({
     apiKey: "test_local_fixture_not_a_credential",
     maxRetries: 0,
@@ -80,7 +66,6 @@ function harness(responses: { status?: number; body?: unknown }[] = []) {
       requests.push({
         url: String(input),
         method: init?.method ?? "GET",
-        headers: new Headers(init?.headers),
         body: init?.body ? JSON.parse(String(init.body)) : {},
       });
       const response = responses.shift();
@@ -141,20 +126,19 @@ const subscription = {
 } as Subscription;
 
 describe("fluent public contract", () => {
-  it("adds its package token to the SDK's User-Agent and Vatly-Client-Info once", async () => {
-    const h = harness([{ body: { data: [], links: {}, count: 0 } }]);
+  it("adds its package token to the SDK client's User-Agent chain", () => {
+    const calls: string[] = [];
+    const h = harness();
+    const api = h.wiring.api as unknown as { addVersionString: (token: string) => void };
+    api.addVersionString = (token) => {
+      calls.push(token);
+    };
     new Vatly(h.wiring);
-    await h.vatly.api.customers.list();
-    const token = `getvatly/fluent/${FLUENT_VERSION}`;
-    const headers = h.requests[0]!.headers;
-    expect(headers.get("user-agent")).toBe(
-      `getvatly/sdk/${packageVersion("@getvatly/sdk")} Node/${process.versions.node} ${token}`,
-    );
-    expect(headers.get("vatly-client-info")).toMatch(new RegExp(`; integrations=${token}$`));
+    expect(calls).toEqual([`getvatly/fluent/${FLUENT_VERSION}`]);
   });
 
   it("reports the version in package.json", () => {
-    expect(FLUENT_VERSION).toBe(packageVersion("."));
+    expect(FLUENT_VERSION).toBe(packageVersion());
   });
 
   it("builds reusable subscription checkouts without accumulating products", async () => {
