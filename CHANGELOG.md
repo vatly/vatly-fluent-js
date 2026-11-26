@@ -5,6 +5,13 @@ Every alpha release may include breaking changes; pin exact versions.
 
 ## [Unreleased]
 
+### Added
+
+- `new Vatly({ api })` adds `getvatly/fluent/<version>` to the API client's
+  User-Agent and `Vatly-Client-Info`, after the SDK's own token, with the SDK's
+  `addVersionString()`. On an SDK without that method (0.3.0-alpha.5) nothing
+  changes. `FLUENT_VERSION` exports the version.
+
 ## 0.1.0-alpha.4
 
 ### Changed

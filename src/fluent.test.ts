@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { readFileSync } from "node:fs";
 import {
   type Subscription,
   VatlyClient,
@@ -9,6 +10,7 @@ import {
 import { describe, expect, it } from "vitest";
 import {
   type DomainEvent,
+  FLUENT_VERSION,
   type LocalSubscription,
   type Repository,
   Vatly,
@@ -18,6 +20,8 @@ import {
 } from "./index.js";
 
 const secret = "local-test-signing-secret";
+const packageVersion = (): string =>
+  JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
 const now = Math.floor(Date.now() / 1000);
 function envelope(eventName: string, object: object, id = crypto.randomUUID()) {
   return JSON.stringify({
@@ -122,6 +126,21 @@ const subscription = {
 } as Subscription;
 
 describe("fluent public contract", () => {
+  it("adds its package token to the SDK client's User-Agent chain", () => {
+    const calls: string[] = [];
+    const h = harness();
+    const api = h.wiring.api as unknown as { addVersionString: (token: string) => void };
+    api.addVersionString = (token) => {
+      calls.push(token);
+    };
+    new Vatly(h.wiring);
+    expect(calls).toEqual([`getvatly/fluent/${FLUENT_VERSION}`]);
+  });
+
+  it("reports the version in package.json", () => {
+    expect(FLUENT_VERSION).toBe(packageVersion());
+  });
+
   it("builds reusable subscription checkouts without accumulating products", async () => {
     const first = {
       id: "a",
