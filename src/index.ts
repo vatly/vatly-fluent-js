@@ -9,11 +9,17 @@ import { CustomerHandle, CustomerService } from "./customers.js";
 import { OrderHandle, SubscriptionHandle } from "./handles.js";
 import { WebhookProcessor } from "./webhooks.js";
 
+/** This package's version, sent as `getvatly/fluent/<version>` in the API client's User-Agent. */
+export const FLUENT_VERSION = "0.1.0-alpha.4";
+
 /** Composes the SDK with driver-owned persistence; it never constructs another transport. */
 export class Vatly {
   readonly customers: CustomerService;
   constructor(readonly wiring: Wiring) {
     this.customers = new CustomerService(wiring);
+    // SDK 0.3.0-alpha.5 has no addVersionString(); the request goes out without the token.
+    const api = wiring.api as { addVersionString?: (versionString: string) => void };
+    api.addVersionString?.(`getvatly/fluent/${FLUENT_VERSION}`);
   }
   get api(): Wiring["api"] {
     return this.wiring.api;
